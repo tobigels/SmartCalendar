@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Calendar</title>
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+    <link href="styles/myStyles.css" rel="stylesheet" type="text/css" />
+    <meta charset="utf-8">
+    <script src="styles/jquery-1.12.0.min.js">
+    </script>
+    <script type="text/javascript">
+		$(document).ready(function() {
+    	console.log( "ready" );
+	});
+
+    </script>  
+</head>
+<body>
+	<h1>Smart Calendar</h1>
+	<div id="clock">
+		<svg height="1000" width="1000">
+
+
+			<defs>
+    			<filter id="shadow" width="200%" height="200%">
+      				<feOffset result="offOut" in="SourceAlpha" dx="0" dy="0" />
+      				<feGaussianBlur result="blurOut" in="offOut" stdDeviation="10" />
+      				<feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+    			</filter>
+    			<filter id="fade" width="200%" height="300%">
+      				<feOffset result="offOut" in="SourceGraphic" dx="0" dy="40" />
+      				<feGaussianBlur result="blurOut" in="offOut" stdDeviation="20" />
+      				<feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+    			</filter>
+  			</defs>
+
+			<script type="text/ecmascript"><![CDATA[
+
+				$(document).ready(function() {
+					console.log("in svg");
+					createDays();
+					createMonths();
+				});
+
+				var monthsText = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+				var allDays = [];
+				var allMonths = [];
+				var displayedDay;
+				var displayedMonth;
+				var numDays = 31;
+				var numPanels = 14;
+
+				var angle= 360/ parseInt(numPanels);
+				var stroke = 1068/ (parseInt(numDays)); /*1086 / 2 for fulll stroke-offset*/
+
+				function createDays() {
+					var counter = 0;
+					var svg = document.getElementById('days');
+					var svgns =  "http://www.w3.org/2000/svg";
+					
+
+					
+
+					while(parseInt(counter) < numPanels) {
+						console.log("doFunc_day");
+
+						var elem = document.createElementNS(svgns, "polygon");
+						//elem.setAttributeNS(null, "x", 460);
+						//elem.setAttributeNS(null, "y", 290);
+						elem.setAttributeNS(null, "points","455,290 545,290 530,350 470,350");
+						elem.setAttributeNS(null, "fill","rgb(50,50,155)");
+						elem.setAttributeNS(null, "onclick","changeDay(evt)");
+						elem.setAttributeNS(null, "opacity","0.2");
+						elem.setAttributeNS(null, "class","ImADay");
+						elem.setAttributeNS(null, "transform","rotate("+parseInt(counter)*angle+",500,500)");
+
+						svg.appendChild(elem);
+						allDays.push(elem);
+
+						counter = counter +1;
+					}
+					displayedDay = allDays[0];
+					displayedDay.setAttribute("opacity","1.0");
+				}
+
+				function createMonths() {
+					var counter = 0;
+					var svg = document.getElementById('months');
+					var svgns =  "http://www.w3.org/2000/svg";
+
+					while(parseInt(counter) < 12) {
+						console.log("doFunc_month");
+
+						var elem = document.createElementNS(svgns, "text");
+						elem.setAttributeNS(null, "x", 500);
+						elem.setAttributeNS(null, "y", 530);
+						elem.setAttributeNS(null, "font-size",40);
+						elem.setAttributeNS(null, "opacity","0");
+						elem.setAttributeNS(null, "text-anchor","middle");
+
+						var textNode = document.createTextNode(monthsText[counter]);
+						elem.appendChild(textNode);
+
+						svg.appendChild(elem);
+						allMonths.push(elem);
+
+						counter = counter +1;
+					}
+					displayedMonth = allMonths[0];
+					displayedMonth.setAttribute("opacity",1);
+				}
+
+				var draggable = false;
+				var index_day = 0;
+				var index_day_two = 0;
+
+				var index_month=0;
+
+				function nextMonth(evt) {
+					index_month = (index_month + 1)%12;
+					displayedMonth.setAttribute('opacity',0);
+					displayedMonth = allMonths[index_month];
+					displayedMonth.setAttribute('opacity',1);
+
+					showDay(index_day_two);
+
+				}
+
+				function previousMonth(evt) {
+					index_month = ((index_month+12)-1)%12;
+					displayedMonth.setAttribute('opacity',0);
+					displayedMonth = allMonths[index_month];
+					displayedMonth.setAttribute('opacity',1);
+
+					showDay(index_day_two);
+				
+				}
+
+				//var index_weekdays=1;
+
+				function leftDay() {
+
+					var weekdays = document.getElementById('weekdays');
+					var angleVal= index_day*angle;
+
+					weekdays.setAttribute( "transform","rotate("+angleVal+",500,500)");
+
+					var dayNum=document.getElementById('dateNum');
+					index_day = (parseInt(index_day)%numDays+1);
+
+					index_day_two = ((parseInt(index_day_two-2)+31)%numDays+1);
+					dayNum.textContent=index_day_two;
+
+					allDays[0].setAttribute("opacity","0.2");
+					allDays[1].setAttribute("opacity","0.2");
+					allDays[13].setAttribute("opacity","1.0");
+
+					showDay(index_day_two);
+				}
+
+				function rightDay() {
+
+					var weekdays = document.getElementById('weekdays');
+					var angleVal= index_day*angle;
+
+					console.log(angleVal);
+					weekdays.setAttribute( "transform","rotate("+angleVal+",500,500)");
+
+					var dayNum=document.getElementById('dateNum');
+					index_day = ((parseInt(index_day-2)+31)%numDays+1);
+					index_day_two = (parseInt(index_day_two)%numDays+1);
+					dayNum.textContent=index_day_two
+
+					allDays[0].setAttribute("opacity","0.2");
+					allDays[1].setAttribute("opacity","1.0");
+					allDays[13].setAttribute("opacity","0.2");
+
+					showDay(index_day_two);
+				}
+
+				function showDay(index) {
+
+					var event_1= document.getElementById('event_1');
+					var event_10= document.getElementById('event_10');
+					var event_20= document.getElementById('event_20');
+					var event_23= document.getElementById('event_23');
+					var timer;
+					var op = 0;
+
+					// 1.3 10.7 20.6 23.12
+
+					if(index ==1 && index_month == 2) {
+						event_1.setAttribute("opacity","1.0");
+					} else if(index == 10 && index_month == 6) {
+						event_10.setAttribute("opacity","1.0");
+					} else if(index == 20 && index_month == 5) {
+						event_20.setAttribute("opacity","1.0");
+					} else if(index == 23 && index_month == 11) {
+						event_23.setAttribute("opacity","1.0");
+					} else {
+						clearInterval(timer);
+						event_1.setAttribute("opacity","0");
+						event_10.setAttribute("opacity","0");
+						event_20.setAttribute("opacity","0");
+						event_23.setAttribute("opacity","0");
+					}
+
+				}
+
+				function changeRed() {
+					changeColor("155,50,50");
+				}
+
+				function changeGreen() {
+					changeColor("50,155,50");
+				}
+
+				function changeBlue() {
+					changeColor("50,50,155");
+				}
+
+				function changeColor(color) {
+					for(var i=0; i < allDays.length; i++) {
+						allDays[i].setAttribute("fill","rgb("+color+")");
+						document.getElementById("textBadge").setAttribute("stroke","rgb("+color+")");
+						document.getElementById("arrow_r").setAttribute("fill","rgb("+color+")");
+						document.getElementById("arrow_l").setAttribute("fill","rgb("+color+")");
+						document.getElementById("arrow_down").setAttribute("fill","rgb("+color+")");
+						document.getElementById("settings_back").setAttribute("fill","rgb("+color+")");
+					}	
+				}
+
+
+
+
+			]]>
+			</script>
+
+
+			<g id="days" >
+				<!-- space for days -->
+				<animateTransform fill="freeze" begin="dayOverlay_left.click" attributeName="transform" type="rotate" dur="0.5" from="0,500,500" to="26.2,500,500"/>
+				<animateTransform fill="freeze" begin="dayOverlay_right.click" attributeName="transform" type="rotate" dur="0.5" from="0,500,500" to="-26.2,500,500"/>
+			</g>
+			<image id="weekdays" xlink:href="styles/images/weekdays.png" x="0" y="290" width="1000" height="420" angle="0" transform="rotate(0,500,500)">
+				<animateTransform additive="sum" fill="freeze" begin="dayOverlay_left.click" attributeName="transform" type="rotate" dur="0.5" from="0,500,500" to="26.2,500,500"/>
+				<animateTransform additive="sum" fill="freeze" begin="dayOverlay_right.click" attributeName="transform" type="rotate" dur="0.5" from="0,500,500" to="-26.2,500,500"/>
+			</image>
+
+			<!--<line x1="500" y1="0" x2="500" y2="1000" style="stroke:rgb(255,0,0);stroke-width:1"/>
+			<line x1="290" y1="0" x2="290" y2="1000" style="stroke:rgb(255,0,0);stroke-width:1"/>
+			<line x1="710" y1="0" x2="710" y2="1000" style="stroke:rgb(255,0,0);stroke-width:1"/>-->
+			<circle cx="500" cy="500" r="160" fill="transparent"/>
+			<g id="texts" fill="rgb(104,104,104)">
+				<text text-anchor="middle" id="dateNum" x="500" y="470" font-size="115">31</text>
+			</g>
+			<rect id="dayOverlay_right" x="500" y="290" onclick="rightDay()" width="200" height="180" fill="transparent" onclick="changeDay(evt)"></rect>
+			<rect id="dayOverlay_left" x="300" y="290" onclick="leftDay()" width="200" height="180" fill="transparent" onclick="changeDay(evt)"></rect>
+
+			<ellipse id="moreInfo" cx="500" cy="520" rx="210" ry="45" fill="rgb(204,204,204" >
+				<animate attributeType="XML" begin="topOverlay.click" fill="freeze" attributeName="ry" dur="1" from="45" to="185"/>
+				<animate attributeType="XML" begin="moreInfo.click" fill="freeze" attributeName="ry" dur="1" from="185" to="45"/>
+			</ellipse>
+			<circle cx="500" cy="1280" r="804" fill="white"/>	
+			<circle cx="500" cy="1280" r="655" fill="transparent" stroke="rgb(204,204,204)" stroke-width="300" stroke-dasharray="350,10" stroke-dashoffset="330">
+				<animateTransform begin="rightOverlay.click" attributeName="transform" type="rotate" dur="1" from="30,500,1280" to="0,500,1280"/>
+				<animateTransform begin="leftOverlay.click" attributeName="transform" type="rotate" dur="1" from="0,500,1280" to="30,500,1280"/>
+			</circle>
+
+			<polygon id="arrow_down" points="480,500 500,510 520,500 520,490 500,500 480,490" fill="rgb(50,50,155)" >
+				<animateTransform begin="topOverlay.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,0" to="0,-148"/>
+				<animateTransform begin="moreInfo.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,-148" to="0,0"/>
+			</polygon>
+			
+			<circle id="textBadge" cx="500" cy="1280" r="765" fill="transparent" stroke="rgb(50,50,155)" stroke-width="55" stroke-dasharray="260,808" stroke-dashoffset="800">
+				<animateTransform begin="topOverlay.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,0" to="0,-115"/>
+				<animateTransform begin="moreInfo.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,-115" to="0,0"/>
+			</circle>	
+			<g id="months" font-family="Futura" fill="white">
+				<animateTransform begin="topOverlay.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,0" to="0,-115"/>
+				<animateTransform begin="moreInfo.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,-115" to="0,0"/>
+			<!--</circle>-->
+				<!-- space for months -->
+			</g>
+
+			<g id="event_1" font-family="Droid Sans Mono" fill="rgb(134,134,134)" opacity="0">
+				<rect width="90" height="35" x="335" y="564">
+				</rect>
+				<rect width="90" height="35" x="335" y="634">
+				</rect>
+				<rect width="90" height="35" x="335" y="674">
+				</rect>
+				<text class="time" x="340" y="590" font-size="26" fill="white">15:30</text>
+				<text class="time" x="340" y="660" font-size="26" fill="white">18:00</text>
+				<text class="time" x="340" y="700" font-size="26" fill="white">20:00</text>
+				<text x="440" y="590" font-size="26">Grillparty bei</text>
+				<text x="440" y="620" font-size="26">Hermann</text>
+				<text x="440" y="660" font-size="26">Einkaufen</text>
+				<text x="440" y="700" font-size="26">Grillparty</text>
+				<animateTransform begin="topOverlay.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,0" to="0,-115"/>
+				<animateTransform begin="moreInfo.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,-115" to="0,0"/>
+			</g>
+
+			<g id="event_10" font-family="Droid Sans Mono" fill="rgb(134,134,134)" opacity="0">
+				<rect width="90" height="35" x="335" y="564">
+				</rect>
+				<rect width="90" height="35" x="335" y="604">
+				</rect>
+				<rect width="90" height="35" x="335" y="644">
+				</rect>
+				<text x="340" y="590" font-size="26" fill="white">15:30</text>
+				<text x="340" y="630" font-size="26" fill="white">18:00</text>
+				<text x="340" y="670" font-size="26" fill="white">20:00</text>
+				<text x="440" y="590" font-size="26">Meeting</text>
+				<text x="440" y="630" font-size="26">Klausur</text>
+				<text x="440" y="670" font-size="26">Abendessen</text>
+				<animateTransform begin="topOverlay.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,0" to="0,-115"/>
+				<animateTransform begin="moreInfo.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,-115" to="0,0"/>
+			</g>
+
+			<g id="event_20" font-family="Droid Sans Mono" fill="rgb(134,134,134)" opacity="0">
+				<rect width="90" height="35" x="335" y="564">
+				</rect>
+				<rect width="90" height="35" x="335" y="604">
+				</rect>
+				<rect width="90" height="35" x="335" y="644">
+				</rect>
+				<text x="340" y="590" font-size="26" fill="white">15:30</text>
+				<text x="340" y="630" font-size="26" fill="white">18:00</text>
+				<text x="340" y="670" font-size="26" fill="white">20:00</text>
+				<text x="440" y="590" font-size="26">Lernen</text>
+				<text x="440" y="630" font-size="26">Lernen</text>
+				<text x="440" y="670" font-size="26">Lernen ...</text>
+				<animateTransform begin="topOverlay.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,0" to="0,-115"/>
+				<animateTransform begin="moreInfo.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,-115" to="0,0"/>
+			</g>
+
+			<g id="event_23" font-family="Droid Sans Mono" fill="rgb(134,134,134)" opacity="0">
+				<rect width="90" height="35" x="335" y="564">
+				</rect>
+				<text x="340" y="590" font-size="26" fill="white">15:30</text>
+				<text x="440" y="590" font-size="26">Geschenke kaufen</text>
+				<animateTransform begin="topOverlay.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,0" to="0,-115"/>
+				<animateTransform begin="moreInfo.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,-115" to="0,0"/>
+			</g>
+
+			<circle id="setButton" cx="500" cy="780" r="30" stroke-width="10" fill="rgb(134,134,134)">
+				<animateTransform begin="topOverlay.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,0" to="0,-115"/>
+				<animateTransform begin="moreInfo.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,-115" to="0,0"/>
+			</circle>
+			<image xlink:href="styles/images/settings.png" x="480" y="760" width="40" height="40">
+				<animateTransform begin="topOverlay.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,0" to="0,-115"/>
+				<animateTransform begin="moreInfo.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,-115" to="0,0"/>
+			</image>
+
+			<g>
+				<rect height="100" width="1000" x="360" y="220" fill="rgb(204,204,204)" filter="url(#fade)" transform="rotate(135,500,500)">
+				</rect>
+				<rect height="100" width="1000" x="-360" y="220" fill="rgb(204,204,204)" filter="url(#fade)" transform="rotate(225,500,500)">
+				</rect>
+				<animate attributeType="XML" begin="topOverlay.click" fill="freeze" attributeName="opacity" dur="1" from="1" to="0"/>
+				<animate attributeType="XML" begin="moreInfo.click" fill="freeze" attributeName="opacity" dur="1" from="0" to="1"/>
+			</g>
+
+
+			<circle cx="500" cy="500" r="210"
+			stroke="black" stroke-width="10" fill="none">
+			<!--1068 circle elements for full circle-->
+			</circle>
+			<image xlink:href="styles/images/smartwatch.png" x="0" y="500" width="1000" height="506"></image>
+
+
+			
+			<!-- Overlays -->
+			<circle id="setButtonOverlay" cx="500" cy="780" r="30" stroke-width="10" fill="transparent">
+				<animateTransform begin="topOverlay.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,0" to="0,-115"/>
+				<animateTransform begin="moreInfo.click" fill="freeze" attributeName="transform" type="translate" dur="1" from="0,-115" to="0,0"/>
+			</circle>
+
+			<g>
+				<polygon id="arrow_r" points="660,600 670,580 660,560 650,560 660,580 650,600" fill="rgb(50,50,155)">
+				</polygon>
+				<polygon id="arrow_l" points="340,600 330,580 340,560 350,560 340,580 350,600" fill="rgb(50,50,155)">
+				</polygon>
+				<animate attributeType="XML" begin="topOverlay.click" fill="freeze" attributeName="opacity" dur="1" from="1" to="0"/>
+				<animate attributeType="XML" begin="moreInfo.click" fill="freeze" attributeName="opacity" dur="1" from="0" to="1"/>
+			</g>
+
+
+			<rect id="rightOverlay" onclick="nextMonth(evt)" x="560" y="500" width="150" height="200" fill="transparent"></rect>
+			<rect id="leftOverlay" onclick="previousMonth(evt)" x="290" y="500" width="150" height="200" fill="transparent"></rect>
+			<rect id="topOverlay" x="290" y="470" width="420" height="60" fill="transparent"></rect>
+
+			<circle id="settings" cx="500" cy="500" r="0" fill="rgb(204,204,204)" filter="url(#shadow)" stroke="transparent" stroke-width="50">
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="r" dur="0.5" from="0" to="165"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="r" dur="0.5" from="165" to="0"/>
+			</circle>
+			<text font-family="Futura" fill="rgb(134,134,134)" text-anchor="middle" id="dateNum" x="500" y="500" font-size="0">
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="font-size" dur="0.5" from="0" to="40"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="font-size" dur="0.5" from="40" to="0"/>
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="y" dur="0.5" from="500" to="400"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="y" dur="0.5" from="400" to="500"/>
+				Settings
+			</text>
+			<text font-family="Droid Sans Mono" fill="rgb(134,134,134)" text text-anchor="left" id="dateNum" x="500" y="500" font-size="0">
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="font-size" dur="0.5" from="0" to="26"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="font-size" dur="0.5" from="26" to="0"/>
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="y" dur="0.5" from="500" to="450"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="y" dur="1" from="450" to="500"/>
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="x" dur="0.5" from="500" to="390"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="x" dur="0.5" from="390" to="500"/>
+			Colour
+			</text>
+			<rect id="settings_back" x="440" y="500" width="0" height="0" fill="rgb(50,50,155)">
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="y" dur="0.5" from="500" to="580"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="y" dur="0.5" from="580" to="500"/>
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="height" dur="0.5" from="0" to="60"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="height" dur="0.5" from="60" to="0"/>
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="height" dur="0.5" from="0" to="60"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="height" dur="0.5" from="60" to="0"/>
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="width" dur="0.5" from="0" to="120"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="width" dur="0.5" from="120" to="0"/>
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="x" dur="0.5" from="500" to="440"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="x" dur="0.5" from="440" to="500"/>
+			</rect>
+			<text font-family="Futura" fill="white" text-anchor="middle" id="dateNum" x="500" y="500" font-size="0">
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="font-size" dur="0.5" from="0" to="40"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="font-size" dur="0.5" from="40" to="0"/>
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="y" dur="0.5" from="500" to="625"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="y" dur="0.5" from="625" to="500"/>
+				Back
+			</text>
+			<circle id="settings_overlay" cx="500" cy="500" r="0" fill="transparent">
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="r" dur="0.5" from="0" to="205"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="r" dur="0.5" from="205" to="0"/>
+			</circle>
+			<circle id="red" onclick="changeRed()" cx="500" cy="500" r="0" fill="rgb(155,55,55)" >
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="r" dur="0.5" from="0" to="30"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="r" dur="0.5" from="30" to="0"/>
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="cx" dur="0.5" from="500" to="590"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="cx" dur="0.5" from="590" to="500"/>
+			</circle>
+			<circle id="green" onclick="changeGreen()" cx="500" cy="500" r="0" fill="rgb(55,155,55)">
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="r" dur="0.5" from="0" to="30"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="r" dur="0.5" from="30" to="0"/>
+			</circle>
+			<circle id="blue" onclick="changeBlue()" cx="500" cy="500" r="0" fill="rgb(55,55,155)">
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="r" dur="0.5" from="0" to="30"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="r" dur="0.5" from="30" to="0"/>
+				<animate attributeType="XML" begin="setButtonOverlay.click" fill="freeze" attributeName="cx" dur="0.5" from="500" to="410"/>
+				<animate attributeType="XML" begin="settings_overlay.click" fill="freeze" attributeName="cx" dur="0.5" from="410" to="500"/>
+			</circle>
+		</svg>
+	</div>
+	<div id="clock_image">
+		
+	</div>
+
+</body>
+</html>

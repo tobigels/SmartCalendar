@@ -1,0 +1,36 @@
+
+#clock {
+
+	height: 500px;
+	width: 1000px;
+	background-image: url("images/smartwatch.jpg");
+}
+
+#clock_image {
+	/*background-image: url("images/smartwatch.jpg");*/
+	height: 1000px;
+	width: 1000px;
+}
+
+@font-face {
+	font-family: "Futura";
+	src: url("fonts/a_FuturaOrto-Bold_2258.ttf") format("truetype");
+}
+
+#texts {
+	font-family: "Futura";
+	text-align: center;
+}
+
+#weekDays {
+	background-image: url("images/smartwatch.jpg");	
+}
+
+#event {
+	font-family: "Futura";
+	text-align: center;
+}
+
+.time {
+	font-size: 40;
+}
